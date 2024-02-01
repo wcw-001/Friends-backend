@@ -1,0 +1,8 @@
+-------------------------------------------------------------------------------
+Test set: com.wcw.usercenter.service.UserServiceTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 5.321 s <<< FAILURE! - in com.wcw.usercenter.service.UserServiceTest
+userRegister  Time elapsed: 0.446 s  <<< ERROR!
+com.wcw.usercenter.exception.BusinessException: 请求参数错误
+	at com.wcw.usercenter.service.UserServiceTest.userRegister(UserServiceTest.java:44)
+

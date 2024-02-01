@@ -1,0 +1,26 @@
+-------------------------------------------------------------------------------
+Test set: com.wcw.usercenter.UserCenterApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 2.216 s <<< FAILURE! - in com.wcw.usercenter.UserCenterApplicationTests
+contextLoads  Time elapsed: 2.214 s  <<< ERROR!
+org.mybatis.spring.MyBatisSystemException: 
+nested exception is org.apache.ibatis.exceptions.PersistenceException: 
+### Error querying database.  Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection; nested exception is java.sql.SQLException: Access denied for user 'root'@'182.104.95.223' (using password: YES)
+### The error may exist in com/wcw/usercenter/mapper/UserMapper.java (best guess)
+### The error may involve com.wcw.usercenter.mapper.UserMapper.selectList
+### The error occurred while executing a query
+### Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection; nested exception is java.sql.SQLException: Access denied for user 'root'@'182.104.95.223' (using password: YES)
+	at com.wcw.usercenter.UserCenterApplicationTests.contextLoads(UserCenterApplicationTests.java:19)
+Caused by: org.apache.ibatis.exceptions.PersistenceException: 
+
+### Error querying database.  Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection; nested exception is java.sql.SQLException: Access denied for user 'root'@'182.104.95.223' (using password: YES)
+### The error may exist in com/wcw/usercenter/mapper/UserMapper.java (best guess)
+### The error may involve com.wcw.usercenter.mapper.UserMapper.selectList
+### The error occurred while executing a query
+### Cause: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection; nested exception is java.sql.SQLException: Access denied for user 'root'@'182.104.95.223' (using password: YES)
+	at com.wcw.usercenter.UserCenterApplicationTests.contextLoads(UserCenterApplicationTests.java:19)
+Caused by: org.springframework.jdbc.CannotGetJdbcConnectionException: Failed to obtain JDBC Connection; nested exception is java.sql.SQLException: Access denied for user 'root'@'182.104.95.223' (using password: YES)
+	at com.wcw.usercenter.UserCenterApplicationTests.contextLoads(UserCenterApplicationTests.java:19)
+Caused by: java.sql.SQLException: Access denied for user 'root'@'182.104.95.223' (using password: YES)
+	at com.wcw.usercenter.UserCenterApplicationTests.contextLoads(UserCenterApplicationTests.java:19)
+
