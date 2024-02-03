@@ -49,7 +49,7 @@ public interface TeamService extends IService<Team> {
 
     /**
      * 退出队伍
-     * @param teamQueryRequest
+     * @param teamQuitRequest
      * @param loginUser
      * @return
      */

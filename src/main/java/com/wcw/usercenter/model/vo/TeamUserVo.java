@@ -2,10 +2,8 @@ package com.wcw.usercenter.model.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 /**
  * 队伍和用户信息封装类（脱敏）
@@ -14,6 +12,10 @@ import java.util.List;
 @Data
 public class TeamUserVo implements Serializable {
     private static final long serialVersionUID = 9060368554152825001L;
+    /**
+     * 队伍id
+     */
+    private Long id;
     /**
      * 队伍名称
      */

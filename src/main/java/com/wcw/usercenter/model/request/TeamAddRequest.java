@@ -35,6 +35,7 @@ public class TeamAddRequest implements Serializable {
     /**
      * 过期时间
      */
+    @JsonFormat(locale="zh", timezone="GMT+8", pattern="yyyy-MM-dd HH:mm:ss")
     private Date expireTime;
 
     /**
