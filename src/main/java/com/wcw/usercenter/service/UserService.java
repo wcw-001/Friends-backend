@@ -1,7 +1,10 @@
 package com.wcw.usercenter.service;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.wcw.usercenter.common.BaseResponse;
 import com.wcw.usercenter.model.domain.User;
 import com.wcw.usercenter.model.request.UserUpdatePasswordRequest;
+import com.wcw.usercenter.model.vo.UserVo;
+
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
@@ -77,4 +80,12 @@ public interface UserService extends IService<User> {
 
     boolean isAdmin(HttpServletRequest request);
     boolean isAdmin(User loginUser);
+
+    /**
+     * 匹配用户
+     * @param num
+     * @param loginUser
+     * @return
+     */
+    List<User> matchUsers(long num, User loginUser);
 }

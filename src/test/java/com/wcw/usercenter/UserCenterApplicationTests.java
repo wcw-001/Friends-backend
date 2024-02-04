@@ -2,6 +2,7 @@ package com.wcw.usercenter;
 
 import com.baomidou.mybatisplus.core.toolkit.Assert;
 import com.wcw.usercenter.mapper.UserMapper;
+import com.wcw.usercenter.model.domain.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 

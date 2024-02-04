@@ -1,11 +1,9 @@
 package com.wcw.usercenter.service.impl;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wcw.usercenter.common.ErrorCode;
 import com.wcw.usercenter.exception.BusinessException;
 import com.wcw.usercenter.mapper.TeamMapper;
-import com.wcw.usercenter.mapper.UserTeamMapper;
 import com.wcw.usercenter.model.domain.Team;
 import com.wcw.usercenter.model.domain.User;
 import com.wcw.usercenter.model.domain.UserTeam;
@@ -19,12 +17,11 @@ import com.wcw.usercenter.model.vo.UserVo;
 import com.wcw.usercenter.service.TeamService;
 import com.wcw.usercenter.service.UserService;
 import com.wcw.usercenter.service.UserTeamService;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -128,9 +125,13 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             if(id != null && id > 0){
                 queryWrapper.eq("id",id);
             }
+            List<Long> idList = teamQuery.getIdList();
+            if(CollectionUtils.isNotEmpty(idList)){
+                queryWrapper.in("id",idList);
+            }
             String searchText = teamQuery.getSearchText();
             if(StringUtils.isNotBlank(searchText)){
-                queryWrapper.like("name",searchText).or().like("description",searchText);
+                queryWrapper.and(qw -> qw.like("name", searchText).or().like("description", searchText));
             }
             String name = teamQuery.getName();
             if(StringUtils.isNotBlank(name)){
@@ -156,7 +157,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
             if (statusEnum == null){
                 statusEnum = TeamStatusEnum.PUBLIC;
             }
-            if(!isAdmin && !statusEnum.equals(TeamStatusEnum.PUBLIC)){
+            if(!isAdmin && !TeamStatusEnum.PUBLIC.equals(statusEnum)){
                 throw new BusinessException(ErrorCode.NO_AUTH,"没有权限");
             }
             queryWrapper.eq("status",statusEnum.getValue());
@@ -164,7 +165,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
         //不展示已过期的队伍
         //expireTime is not null or expireTime > now()
-        queryWrapper.isNull("expireTime").or().gt("expireTime",new Date());
+        queryWrapper.and(qw -> qw.isNull("expireTime").or().gt("expireTime",new Date()));
         List<Team> teamList = this.list(queryWrapper);
         if(CollectionUtils.isEmpty(teamList)){
             return new ArrayList<>();

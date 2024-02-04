@@ -9,9 +9,11 @@ import com.wcw.usercenter.exception.BusinessException;
 import com.wcw.usercenter.exception.ThrowUtils;
 import com.wcw.usercenter.model.domain.User;
 import com.wcw.usercenter.model.request.*;
+import com.wcw.usercenter.model.vo.UserVo;
 import com.wcw.usercenter.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -140,6 +142,7 @@ public class userController {
         List<User> userList = userService.searchUsersByTag(tagNameList);
         return ResultUtils.success(userList);
     }
+    //todo 推荐多个，未实现
     @GetMapping("/recommend")
     public BaseResponse<Page<User>> recommendUsers(long pageSize,long pageNum,HttpServletRequest request) {
         User loginuser = userService.getLoginUser(request);
@@ -238,4 +241,18 @@ public class userController {
         }
     }
 
+    /**
+     * 获取最匹配的用户
+     * @param num
+     * @param request
+     * @return
+     */
+    @GetMapping("/match")
+    public BaseResponse<List<User>> matchUsers(long num, HttpServletRequest request) {
+        if(num <= 0 || num > 20){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        User loginUser = userService.getLoginUser(request);
+        return ResultUtils.success(userService.matchUsers(num,loginUser));
+    }
 }

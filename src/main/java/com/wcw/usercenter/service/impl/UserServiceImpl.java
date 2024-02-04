@@ -3,6 +3,7 @@ package com.wcw.usercenter.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
+import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.wcw.usercenter.common.ErrorCode;
 import com.wcw.usercenter.exception.BusinessException;
@@ -10,8 +11,11 @@ import com.wcw.usercenter.exception.ThrowUtils;
 import com.wcw.usercenter.mapper.UserMapper;
 import com.wcw.usercenter.model.domain.User;
 import com.wcw.usercenter.model.request.UserUpdatePasswordRequest;
+import com.wcw.usercenter.model.vo.UserVo;
 import com.wcw.usercenter.service.UserService;
+import com.wcw.usercenter.utils.AlgorithmUtils;
 import lombok.extern.slf4j.Slf4j;
+import net.bytebuddy.description.method.MethodDescription;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -20,11 +24,11 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.wcw.usercenter.contant.UserConstant.ADMIN_RILE;
 import static com.wcw.usercenter.contant.UserConstant.USER_LOGIN_STATE;
@@ -335,6 +339,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public boolean isAdmin(User loginUser){
 
         return loginUser != null && loginUser.getUserRole() == ADMIN_RILE;
+    }
+
+    @Override
+    public List<User> matchUsers(long num, User loginUser) {
+        List<User> userList = this.list();
+        String tags = loginUser.getTags();
+        Gson gson = new Gson();
+        List<String> tagList = gson.fromJson(tags, new TypeToken<List<String>>() {
+        }.getType());
+        //用户列表的下表 =》 相似度
+        SortedMap<Integer,Long> indexDistanceMap = new TreeMap<>();
+        for(int i =0;i < userList.size();i++){
+            User user = userList.get(i);
+            String userTags = user.getTags();
+            //无标签
+            if(StringUtils.isBlank(userTags)){
+                continue;
+            }
+            List<String> userTagList = gson.fromJson(userTags,new TypeToken<List<String>>(){}.getType());
+            //计算分数
+            long distance = AlgorithmUtils.minDistance(tagList, userTagList);
+            indexDistanceMap.put(i,distance);
+        }
+
+        List<Integer> maxDistanceIndexList = indexDistanceMap.keySet().stream().limit(num).collect(Collectors.toList());
+        List<User> userVoList = maxDistanceIndexList.stream().map(index->{
+            return getSafetyUser(userList.get(index));
+        }).collect(Collectors.toList());
+        return userVoList;
+
     }
 
 
