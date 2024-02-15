@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -78,10 +79,39 @@ public class TeamController {
         if(teamQuery == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        //1、查询用户列表
+        User loginUser = userService.getLoginUser(request);
         boolean isAdmin = userService.isAdmin(request);
-        List<TeamUserVo> teamList = teamService.listTeams(teamQuery,isAdmin);
+        List<TeamUserVo> teamList = teamService.listTeams(teamQuery,isAdmin,loginUser);
+        //队伍Id列表
+        final List<Long> teamIdList = teamList.stream().map(TeamUserVo::getId).collect(Collectors.toList());
+        //2、判断当前用户是否加入队伍
+        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
+        try {
+            //User loginUser = userService.getLoginUser(request);
+            userTeamQueryWrapper.eq("userId",loginUser.getId());
+            userTeamQueryWrapper.in("teamId",teamIdList);
+            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
+            Set<Long> hasJoinTeamIdSet = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
+            teamList.forEach(team -> {
+                boolean hasJoin = hasJoinTeamIdSet.contains(team.getId());
+                team.setHasJoin(hasJoin);
+            });
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        //3、查询加入队伍的用户信息（人数）
+        QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
+        userTeamJoinQueryWrapper.in("teamId",teamIdList);
+        List<UserTeam> userTeamList = userTeamService.list(userTeamJoinQueryWrapper);
+        //队伍id=>加入这个队伍的用户列表
+        Map<Long, List<UserTeam>> teamIdUserTeamList = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
+        teamList.forEach(team -> {
+            team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(),new ArrayList<>()).size());
+        });
         return ResultUtils.success(teamList);
     }
+    // todo 查询分页
     @GetMapping("/list/page")
     public BaseResponse<Page<Team>> listTeamsByPage(TeamQuery teamQuery){
         if(teamQuery == null){
@@ -140,7 +170,8 @@ public class TeamController {
         }
         User loginUser = userService.getLoginUser(request);
         teamQuery.setUserId(loginUser.getId());
-        List<TeamUserVo> teamList = teamService.listTeams(teamQuery,true);
+        List<TeamUserVo> teamList = teamService.listTeams(teamQuery,true,loginUser);
+
         return ResultUtils.success(teamList);
     }
     /**
@@ -162,7 +193,7 @@ public class TeamController {
         Map<Long,List<UserTeam>> listMap = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
         ArrayList<Long> idList = new ArrayList<>(listMap.keySet());
         teamQuery.setIdList(idList);
-        List<TeamUserVo> teamList = teamService.listTeams(teamQuery,true);
+        List<TeamUserVo> teamList = teamService.listTeams(teamQuery,true,loginUser);
         return ResultUtils.success(teamList);
     }
 

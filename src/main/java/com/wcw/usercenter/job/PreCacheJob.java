@@ -46,7 +46,7 @@ public class PreCacheJob {
                 }
             }
         } catch (InterruptedException e) {
-            log.error("yupao:precachejob:docache:loc",e);
+            log.error("yupao:precachejob:docache:lock",e);
         }finally {
             //只能释放自己的锁
             if(lock.isHeldByCurrentThread()){

@@ -111,7 +111,7 @@ public class userController {
         Object userObj = request.getSession().getAttribute(USER_LOGIN_STATE);
         User currentUser = (User) userObj;
         if (currentUser == null){
-            throw new BusinessException(ErrorCode.NULL_ERROR,"系统未登录");
+            throw new BusinessException(ErrorCode.NOT_LOGIN,"系统未登录");
         }
         long userId = currentUser.getId();
 
