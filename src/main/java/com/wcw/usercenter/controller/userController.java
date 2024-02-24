@@ -183,7 +183,7 @@ public class userController {
      * @param request
      * @return
      */
-    @PostMapping("/update")
+    @PutMapping("/update")
     public BaseResponse<Integer> updateUser(@RequestBody User user,HttpServletRequest request){
         //1.校验参数是否为空
         if(user == null){
