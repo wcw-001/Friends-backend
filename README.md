@@ -1,7 +1,7 @@
 ## 项目介绍
 
-校园伙伴匹配（CAMPUS 伙伴），一个前后端分离的用户匹配系统，前端使用 **Vite + Vue3 + Vant4** ，后端使用 **SpringBoot +
-MyBatis-Plus + MySQL + Redis** 等技术，使用 **WebSocket** 实现实时通信，并结合 **阿里云SDK** 完成图片上传。本项目使用Apache
+伙伴匹配（相友聚），一个前后端分离的用户匹配系统，前端使用 **Vite + Vue3 + Vant4** ，后端使用 **SpringBoot +
+MyBatis-Plus + MySQL + Redis** 等技术，使用 **WebSocket** 实现实时通信，并结合 **七牛云** 完成图片上传。本项目使用Apache
 License Version 2.0开源协议。
 
 #### 前端地址:
@@ -93,7 +93,7 @@ GitHub：https://github.com/wcw-001/Friends-frontend
 
 - WebSocket
 
-- 阿里云对象存储 OSS
+- 七牛云对象存储 OSS
 
 ### 软件架构
 ![架构图](doc/readmeimages/README-1694925656896.png)
