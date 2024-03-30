@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import static com.wcw.usercenter.contant.SystemConstants.PAGE_SIZE;
+
 /**
 * @author wcw
 * @description 针对表【team(队伍)】的数据库操作Service实现
@@ -124,7 +126,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public List<TeamUserVo> listTeams(TeamQuery teamQuery,boolean isAdmin,User loginUser) {
+    public Page<TeamUserVo> listTeams(TeamQuery teamQuery,boolean isAdmin,User loginUser) {
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         //组合查询条件
         if(teamQuery != null){
@@ -173,31 +175,33 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         //不展示已过期的队伍
         //expireTime is not null or expireTime > now()
         queryWrapper.and(qw -> qw.isNull("expireTime").or().gt("expireTime",new Date()));
-        List<Team> teamList = this.list(queryWrapper);
-        if(CollectionUtils.isEmpty(teamList)){
-            return new ArrayList<>();
+        Page<Team> teamPage = this.page(new Page<>(teamQuery.getPageNum(),PAGE_SIZE), queryWrapper);
+        List<Team> teamPageRecords = teamPage.getRecords();
+        if(CollectionUtils.isEmpty(teamPageRecords)){
+            return new Page<>();
         }
+        Page<TeamUserVo> teamUserVoPage = new Page<>();
         List<TeamUserVo> teamUserVoList = new ArrayList<>();
         //关联查询创建人的用户信息
-        for (Team team: teamList){
-            Long userId =team.getUserId();
-            if (userId == null){
+        for (Team team: teamPageRecords) {
+            Long userId = team.getUserId();
+            if (userId == null) {
                 continue;
             }
             User user = userService.getById(userId);
             TeamUserVo teamUserVo = new TeamUserVo();
-            BeanUtils.copyProperties(team,teamUserVo);
+            BeanUtils.copyProperties(team, teamUserVo);
             //脱敏用户信息
             UserVo userVo = new UserVo();
-            if(user != null){
-                BeanUtils.copyProperties(user,userVo);
+            if (user != null) {
+                BeanUtils.copyProperties(user, userVo);
                 teamUserVo.setCreateUser(userVo);
             }
             teamUserVoList.add(teamUserVo);
         }
-        return teamUserVoList;
+        teamUserVoPage.setRecords(teamUserVoList);
+        return teamUserVoPage;
     }
-
     @Override
     public boolean updateTeam(TeamUpdateRequest teamUpdateRequest,User loginUser) {
         if(teamUpdateRequest == null){

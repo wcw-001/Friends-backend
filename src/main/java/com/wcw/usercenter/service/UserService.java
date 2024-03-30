@@ -25,7 +25,7 @@ public interface UserService extends IService<User> {
      * @param checkPassword 校验密码
      * @return 新用户 id
      */
-    long userRegister(String userAccount, String userPassword, String checkPassword,String userCode);
+    long userRegister(String phone,String userAccount, String userPassword, String checkPassword);
 
     /**
      *
@@ -88,4 +88,20 @@ public interface UserService extends IService<User> {
      * @return
      */
     List<User> matchUsers(long num, User loginUser);
+
+    /**
+     * 修改密码
+     * @param phone
+     * @param password
+     * @param confirmPassword
+     */
+    void updatePassword(String phone, String password, String confirmPassword);
+
+    /**
+     * 根据id获取用户
+     * @param userId
+     * @param loginUserId
+     * @return
+     */
+    UserVo getUserById(Long userId, Long loginUserId);
 }

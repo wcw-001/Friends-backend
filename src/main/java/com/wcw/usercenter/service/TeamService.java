@@ -1,5 +1,6 @@
 package com.wcw.usercenter.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wcw.usercenter.model.domain.Team;
 import com.wcw.usercenter.model.domain.User;
@@ -31,7 +32,7 @@ public interface TeamService extends IService<Team> {
      * @param teamQuery
      * @return
      */
-    List<TeamUserVo> listTeams(TeamQuery teamQuery, boolean isAdmin,User loginUser);
+    Page<TeamUserVo> listTeams(TeamQuery teamQuery, boolean isAdmin, User loginUser);
 
     /**
      * 更新队伍

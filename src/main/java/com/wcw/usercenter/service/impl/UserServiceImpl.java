@@ -1,5 +1,6 @@
 package com.wcw.usercenter.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
@@ -19,6 +20,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.description.method.MethodDescription;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -31,6 +34,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.wcw.usercenter.contant.RedisConstants.USER_FORGET_PASSWORD_KEY;
 import static com.wcw.usercenter.contant.UserConstant.ADMIN_RILE;
 import static com.wcw.usercenter.contant.UserConstant.USER_LOGIN_STATE;
 
@@ -47,15 +51,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private RedisTemplate redisTemplate;
+
     /**
      * 盐值,将密码进行混淆
      * */
     private static final String SALT = "wcw";
 
     @Override
-    public long userRegister(String userAccount, String userPassword, String checkPassword,String userCode) {
+    public long userRegister(String phone,String userAccount, String userPassword, String checkPassword) {
         //校验
-        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
+        if (StringUtils.isAnyBlank(phone,userAccount, userPassword, checkPassword)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"参数为空");
         }
         if (userAccount.length() < 3) {
@@ -63,9 +70,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户密码过短");
-        }
-        if(userCode.length()>5){
-            throw new BusinessException(ErrorCode.PARAMS_ERROR,"编号过长");
         }
 
         //账户不能包含特殊字符
@@ -83,7 +87,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         //编号不能重复
         queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("userCode", userCode);
+        queryWrapper.eq("phone", phone);
         count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
             return -1;
@@ -94,7 +98,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
-        user.setUserCode(userCode);
+        user.setPhone(phone);
         boolean saveResult = this.save(user);
         if (!saveResult) {
             return -1;
@@ -383,6 +387,42 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         return finallUserList;
 
+    }
+
+    @Override
+    public void updatePassword(String phone, String password, String confirmPassword) {
+        if (!password.equals(confirmPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "两次输入的密码不一致");
+        }
+        String key = USER_FORGET_PASSWORD_KEY + phone;
+        // String correctCode = stringRedisTemplate.opsForValue().get(key);
+        // if (correctCode == null) {
+        //     throw new BusinessException(ErrorCode.PARAMS_ERROR, "请先获取验证码");
+        // }
+        // if (!correctCode.equals(code)) {
+        //     throw new BusinessException(ErrorCode.PARAMS_ERROR, "验证码错误");
+        // }
+        LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userLambdaQueryWrapper.eq(User::getPhone, phone);
+        User user = this.getOne(userLambdaQueryWrapper);
+        String encryptPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+        user.setUserPassword(encryptPassword);
+        this.updateById(user);
+        redisTemplate.delete(key);
+    }
+
+    /**
+     *根据id获取用户
+     * @param userId
+     * @param loginUserId
+     * @return
+     */
+    @Override
+    public UserVo getUserById(Long userId, Long loginUserId) {
+        User user = this.getById(userId);
+        UserVo userVO = new UserVo();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
     }
 
 

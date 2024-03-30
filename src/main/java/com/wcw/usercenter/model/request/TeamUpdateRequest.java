@@ -29,6 +29,7 @@ public class TeamUpdateRequest implements Serializable {
     /**
      * 过期时间
      */
+    @JsonFormat(locale="zh", timezone="GMT+8", pattern="yyyy-MM-dd HH:mm:ss")
     private Date expireTime;
     /**
      * 0 - 公开，1 - 私有，2 - 加密

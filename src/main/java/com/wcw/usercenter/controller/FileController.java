@@ -20,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 public class FileController {
     @Resource
     private QiNiuService ossService;
-
     @Resource
     private UserService userService;
     private static final String filePath=System.getProperty("user.dir")+"/files";

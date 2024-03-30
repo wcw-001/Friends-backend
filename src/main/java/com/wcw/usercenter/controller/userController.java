@@ -1,26 +1,37 @@
 package com.wcw.usercenter.controller;
 
+import cn.hutool.core.lang.UUID;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.google.gson.Gson;
 import com.wcw.usercenter.common.BaseResponse;
 import com.wcw.usercenter.common.ErrorCode;
 import com.wcw.usercenter.common.ResultUtils;
+import com.wcw.usercenter.contant.RedisConstants;
+import com.wcw.usercenter.contant.UserConstant;
 import com.wcw.usercenter.exception.BusinessException;
 import com.wcw.usercenter.exception.ThrowUtils;
 import com.wcw.usercenter.model.domain.User;
 import com.wcw.usercenter.model.request.*;
 import com.wcw.usercenter.model.vo.UserVo;
 import com.wcw.usercenter.service.UserService;
+import com.wcw.usercenter.utils.ValidateCodeUtils;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -37,7 +48,41 @@ public class userController {
     private UserService userService;
     @Resource
     private RedisTemplate<String,Object> redisTemplate;
-
+    /**
+     * 用户注册
+     *
+     * @param userRegisterRequest 用户注册请求
+     * @return {@link BaseResponse}<{@link Long}>
+     */
+    @PostMapping("/register")
+    @ApiOperation(value = "用户注册")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "userRegisterRequest", value = "用户注册请求参数")})
+    public BaseResponse<String> userRegister(@RequestBody UserRegisterRequest userRegisterRequest, HttpServletRequest request) {
+        if (userRegisterRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String phone = userRegisterRequest.getPhone();
+        // String code = userRegisterRequest.getCode();
+        String account = userRegisterRequest.getUserAccount();
+        String password = userRegisterRequest.getUserPassword();
+        String checkPassword = userRegisterRequest.getCheckPassword();
+        if (StringUtils.isAnyBlank(phone, account, password, checkPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "信息不全");
+        }
+        long userId = userService.userRegister(phone, account, password, checkPassword);
+        User userInDatabase = userService.getById(userId);
+        User safetyUser = userService.getSafetyUser(userInDatabase);
+        String token = UUID.randomUUID().toString(true);
+        Gson gson = new Gson();
+        String userStr = gson.toJson(safetyUser);
+        request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, safetyUser);
+        request.getSession().setMaxInactiveInterval(900);
+        redisTemplate.opsForValue().set(RedisConstants.LOGIN_USER_KEY + token, userStr);
+        redisTemplate.expire(RedisConstants.LOGIN_USER_KEY + token, Duration.ofMinutes(15));
+//        bloomFilter.add(USER_BLOOM_PREFIX + userId);
+        return ResultUtils.success(token);
+    }
     /**
      * 用户登入
      * @param userLoginRequest
@@ -79,7 +124,7 @@ public class userController {
      * @param userRegisterRequest
      * @return
      */
-    @PostMapping("/register")
+    @PostMapping("/1/register")
     public BaseResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
         if (userRegisterRequest == null) {
             return ResultUtils.error(ErrorCode.PARAMS_ERROR);
@@ -255,4 +300,83 @@ public class userController {
         User loginUser = userService.getLoginUser(request);
         return ResultUtils.success(userService.matchUsers(num,loginUser));
     }
+    /**
+     * 获取用户通过电话
+     *
+     * @param phone 电话
+     * @return {@link BaseResponse}<{@link String}>
+     */
+    @GetMapping("/forget")
+    @ApiOperation(value = "通过手机号查询用户")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "phone", value = "手机号")})
+    public BaseResponse<String> getUserByPhone(String phone) {
+        if (phone == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        LambdaQueryWrapper<User> userLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        userLambdaQueryWrapper.eq(User::getPhone, phone);
+        User user = userService.getOne(userLambdaQueryWrapper);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "该手机号未绑定账号");
+        } else {
+            String key = RedisConstants.USER_FORGET_PASSWORD_KEY + phone;
+            Integer code = ValidateCodeUtils.generateValidateCode(4);
+//            SMSUtils.sendMessage(phone, String.valueOf(code));
+            System.out.println(code);
+            redisTemplate.opsForValue().set(key, String.valueOf(code), RedisConstants.USER_FORGET_PASSWORD_TTL, TimeUnit.MINUTES);
+            return ResultUtils.success(user.getUserAccount());
+        }
+    }
+    /**
+     * 更新密码
+     *
+     * @param updatePasswordRequest 更新密码请求
+     * @return {@link BaseResponse}<{@link String}>
+     */
+    @PutMapping("/forget")
+    @ApiOperation(value = "修改密码")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "updatePasswordRequest", value = "修改密码请求")})
+    public BaseResponse<String> updatePassword(@RequestBody UpdatePasswordRequest updatePasswordRequest) {
+        String phone = updatePasswordRequest.getPhone();
+        // String code = updatePasswordRequest.getCode();
+        String password = updatePasswordRequest.getPassword();
+        String confirmPassword = updatePasswordRequest.getConfirmPassword();
+        if (StringUtils.isAnyBlank(phone, password, confirmPassword)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        userService.updatePassword(phone, password, confirmPassword);
+        return ResultUtils.success("ok");
+    }
+    /**
+     * 根据id获取用户
+     *
+     * @param id      id
+     * @param request 请求
+     * @return {@link BaseResponse}<{@link UserVo>
+     */
+    @GetMapping("/{id}")
+    @ApiOperation(value = "根据id获取用户")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "id", value = "用户id"),
+                    @ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<UserVo> getUserById(@PathVariable Long id, HttpServletRequest request) {
+//        boolean contains = bloomFilter.contains(USER_BLOOM_PREFIX + id);
+//        if (!contains) {
+//            return ResultUtils.success(null);
+//        }
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        if (id == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        UserVo userVo = userService.getUserById(id, loginUser.getId());
+        return ResultUtils.success(userVo);
+    }
+
+
+
 }

@@ -1,16 +1,28 @@
 package com.wcw.usercenter.once;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.util.ListUtils;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Map;
+
 
 /**
  * 导入Excel
  * @author wcw
  */
 public class ImportExcel {
+
+    private List<UserInfo> data() {
+        List<UserInfo> list = ListUtils.newArrayList();
+        for (int i = 0; i < 10; i++) {
+            UserInfo info = new UserInfo();
+            info.setUsername("小王");
+            info.setUserCode("1009");
+            list.add(info);
+        }
+        return list;
+    }
     /**
      * 监听器读取数据
      */
@@ -35,4 +47,17 @@ public class ImportExcel {
             System.out.println(userInfo);
         }
     }
+
+    /**
+     * 监听器写入数据
+     */
+    @Test
+    public void simpleWrite() {
+        String fileName = "D:\\用户中心\\user-center\\src\\main\\resources\\user.xlsx";
+        // 这里 需要指定写用哪个class去读，然后写到第一个sheet，名字为模板 然后文件流会自动关闭
+        // 如果这里想使用03 则 传入excelType参数即可
+        EasyExcel.write(fileName, UserInfo.class).sheet("模板").doWrite(data());
+    }
+
+
 }
