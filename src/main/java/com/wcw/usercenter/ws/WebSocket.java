@@ -221,7 +221,7 @@ public class WebSocket {
      */
     @OnClose
     public void onClose(@PathParam("userId") String userId, @PathParam(value = "teamId") String teamId, Session session) {
-/*        try {
+        try {
             if (!"NaN".equals(teamId)) {
                 ROOMS.get(teamId).remove(userId);
                 if (getOnlineCount() > 0) {
@@ -238,7 +238,7 @@ public class WebSocket {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
     }
 
     /**

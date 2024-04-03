@@ -1,9 +1,11 @@
 package com.wcw.usercenter.model.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.wcw.usercenter.model.domain.User;
 import lombok.Data;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Set;
 
 /**
  * 队伍和用户信息封装类（脱敏）
@@ -69,4 +71,8 @@ public class TeamUserVo implements Serializable {
      *是否已经加入
      */
     private boolean hasJoin = false;
+    /**
+     * 队友
+     */
+    private Set<User> userSet;
 }

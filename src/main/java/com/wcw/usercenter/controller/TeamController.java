@@ -23,10 +23,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -86,55 +83,13 @@ public class TeamController {
         List<TeamUserVo> teamList = teamUserVoPage.getRecords();
         //队伍Id列表
         final List<Long> teamIdList = teamList.stream().map(TeamUserVo::getId).collect(Collectors.toList());
-        List<TeamUserVo> userJoinedList = getUserJoinedList(loginUser, teamList, teamIdList);
-        List<TeamUserVo> finalTeamList = getTeamHasJoinNum(userJoinedList,teamIdList);
+        List<TeamUserVo> userJoinedList = teamService.getUserJoinedList(loginUser, teamList, teamIdList);
+        List<TeamUserVo> finalTeamList = teamService.getTeamHasJoinNum(userJoinedList,teamIdList);
         return ResultUtils.success(finalTeamList);
     }
 
-    /**
-     * 获取已加入的队伍
-     * @param loginUser
-     * @param teamList
-     * @param teamIdList
-     * @return
-     */
-    private List<TeamUserVo>  getUserJoinedList(User loginUser, List<TeamUserVo> teamList, List<Long> teamIdList) {
-        //2、判断当前用户是否加入队伍
-        QueryWrapper<UserTeam> userTeamQueryWrapper = new QueryWrapper<>();
-        try {
-            //User loginUser = userService.getLoginUser(request);
-            userTeamQueryWrapper.eq("userId", loginUser.getId());
-            userTeamQueryWrapper.in("teamId", teamIdList);
-            List<UserTeam> userTeamList = userTeamService.list(userTeamQueryWrapper);
-            Set<Long> hasJoinTeamIdSet = userTeamList.stream().map(UserTeam::getTeamId).collect(Collectors.toSet());
-            teamList.forEach(team -> {
-                boolean hasJoin = hasJoinTeamIdSet.contains(team.getId());
-                team.setHasJoin(hasJoin);
-            });
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return teamList;
-    }
 
-    /**
-     * 查询加入队伍的用户信息（人数）
-     * @param teamList
-     * @param teamIdList
-     * @return
-     */
-    private List<TeamUserVo> getTeamHasJoinNum(List<TeamUserVo> teamList, List<Long> teamIdList) {
-        //3、查询加入队伍的用户信息（人数）
-        QueryWrapper<UserTeam> userTeamJoinQueryWrapper = new QueryWrapper<>();
-        userTeamJoinQueryWrapper.in("teamId", teamIdList);
-        List<UserTeam> userTeamList = userTeamService.list(userTeamJoinQueryWrapper);
-        //队伍id=>加入这个队伍的用户列表
-        Map<Long, List<UserTeam>> teamIdUserTeamList = userTeamList.stream().collect(Collectors.groupingBy(UserTeam::getTeamId));
-        teamList.forEach(team -> {
-            team.setHasJoinNum(teamIdUserTeamList.getOrDefault(team.getId(),new ArrayList<>()).size());
-        });
-        return teamList;
-    }
+
 
     // todo 查询分页
     @GetMapping("/list/page")
@@ -198,8 +153,8 @@ public class TeamController {
         Page<TeamUserVo> teamUserVoPage = teamService.listTeams(teamQuery,true,loginUser);
         List<TeamUserVo> teamUserVoList = teamUserVoPage.getRecords();
         List<Long> teamIdList = teamUserVoList.stream().map(TeamUserVo::getId).collect(Collectors.toList());
-        List<TeamUserVo> userJoinedList = getUserJoinedList(loginUser,teamUserVoList, teamIdList);
-        List<TeamUserVo> teamList = getTeamHasJoinNum(userJoinedList,teamIdList);
+        List<TeamUserVo> userJoinedList = teamService.getUserJoinedList(loginUser,teamUserVoList, teamIdList);
+        List<TeamUserVo> teamList = teamService.getTeamHasJoinNum(userJoinedList,teamIdList);
         return ResultUtils.success(teamList);
     }
     /**
@@ -222,8 +177,8 @@ public class TeamController {
         ArrayList<Long> idList = new ArrayList<>(listMap.keySet());
         teamQuery.setIdList(idList);
         Page<TeamUserVo> teamUserVoPage = teamService.listTeams(teamQuery,true,loginUser);
-        List<TeamUserVo> userJoinedList = getUserJoinedList(loginUser,teamUserVoPage.getRecords(), idList);
-        List<TeamUserVo> teamList = getTeamHasJoinNum(userJoinedList, idList);
+        List<TeamUserVo> userJoinedList = teamService.getUserJoinedList(loginUser,teamUserVoPage.getRecords(), idList);
+        List<TeamUserVo> teamList = teamService.getTeamHasJoinNum(userJoinedList, idList);
         return ResultUtils.success(teamList);
     }
 

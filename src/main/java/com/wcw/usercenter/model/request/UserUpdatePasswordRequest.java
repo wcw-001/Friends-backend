@@ -22,4 +22,6 @@ public class UserUpdatePasswordRequest implements Serializable {
      * 新密码
      */
     private String newPassword;
+
+    private String checkPassword;
 }

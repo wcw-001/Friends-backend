@@ -329,7 +329,7 @@ public class userController {
         }
     }
     /**
-     * 更新密码
+     *根据手机电话更新密码
      *
      * @param updatePasswordRequest 更新密码请求
      * @return {@link BaseResponse}<{@link String}>
@@ -349,6 +349,7 @@ public class userController {
         userService.updatePassword(phone, password, confirmPassword);
         return ResultUtils.success("ok");
     }
+
     /**
      * 根据id获取用户
      *
@@ -377,6 +378,35 @@ public class userController {
         return ResultUtils.success(userVo);
     }
 
-
+    @GetMapping("/tags")
+    public List<String> getUserTags(HttpServletRequest request){
+        User loginUser = userService.getLoginUser(request);
+        if(loginUser == null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long userId = loginUser.getId();
+        List<String> userTags = userService.getUserTags(userId);
+        return userTags;
+    }
+    /**
+     * 更新用户标签
+     *
+     * @param tags    标签
+     * @param request 请求
+     * @return {@link BaseResponse}<{@link String}>
+     */
+    @PutMapping("/update/tags")
+    @ApiOperation(value = "更新用户标签")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "tags", value = "标签"),
+                    @ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<String> updateUserTags(@RequestBody List<String> tags, HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        userService.updateTags(tags, loginUser.getId());
+        return ResultUtils.success("ok");
+    }
 
 }

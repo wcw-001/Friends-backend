@@ -2,9 +2,9 @@ package com.wcw.usercenter.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
-import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.wcw.usercenter.common.ErrorCode;
 import com.wcw.usercenter.exception.BusinessException;
@@ -17,11 +17,9 @@ import com.wcw.usercenter.service.UserService;
 import com.wcw.usercenter.utils.AlgorithmUtils;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.description.method.MethodDescription;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.DigestUtils;
@@ -32,7 +30,6 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.wcw.usercenter.contant.RedisConstants.USER_FORGET_PASSWORD_KEY;
 import static com.wcw.usercenter.contant.UserConstant.ADMIN_RILE;
@@ -167,16 +164,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         if (userId < 0 || userId == null) {
             throw new BusinessException(ErrorCode.NULL_ERROR, "不存在该用户");
         }
-        User user = new User();
-        BeanUtils.copyProperties(updatePasswordRequest, user);
-        user.setId(loginUser.getId());
 
+        User user = new User();
+        user.setId(loginUser.getId());
+        String password = updatePasswordRequest.getUserPassword();
+        String updatePassword = updatePasswordRequest.getNewPassword();
+        String checkPassword = updatePasswordRequest.getCheckPassword();
+        if(!updatePassword.equals(checkPassword)){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码不匹配");
+        }
         // 使用 MD5 加密新密码
-        String encryptedPassword = DigestUtils.md5DigestAsHex((SALT + updatePasswordRequest.getNewPassword()).getBytes());
-        user.setUserPassword(encryptedPassword);
-        if (encryptedPassword.equals(updatePasswordRequest.getUserPassword())) {
+        String encryptedPassword = DigestUtils.md5DigestAsHex((SALT + password).getBytes());
+        String encryptedUpdatePassword = DigestUtils.md5DigestAsHex((SALT + updatePassword).getBytes());
+        if(!encryptedPassword.equals(loginUser.getUserPassword())){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"密码错误");
+        }
+        if (updatePassword.equals(updatePasswordRequest.getUserPassword())) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "修改密码不能相同");
         }
+        user.setUserPassword(encryptedUpdatePassword);
         boolean result = updateById(user);
         ThrowUtils.throwIf(!result, ErrorCode.PARAMS_ERROR);
         return true;
@@ -424,8 +430,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         BeanUtils.copyProperties(user, userVO);
         return userVO;
     }
+    @Override
+    public List<String> getUserTags(Long id) {
+        User user = this.getById(id);
+        String userTags = user.getTags();
+        Gson gson = new Gson();
+        return gson.fromJson(userTags, new TypeToken<List<String>>() {
+        }.getType());
+    }
 
-
+    @Override
+    public void updateTags(List<String> tags, Long userId) {
+        User user = new User();
+        Gson gson = new Gson();
+        String tagsJson = gson.toJson(tags);
+        user.setId(userId);
+        user.setTags(tagsJson);
+        this.updateById(user);
+    }
 }
 
 

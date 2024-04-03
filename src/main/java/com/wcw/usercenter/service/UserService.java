@@ -104,4 +104,10 @@ public interface UserService extends IService<User> {
      * @return
      */
     UserVo getUserById(Long userId, Long loginUserId);
+
+    List<String> getUserTags(Long id);
+
+    void updateTags(List<String> tags, Long id);
+
+
 }
