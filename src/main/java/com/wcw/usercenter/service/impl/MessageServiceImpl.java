@@ -2,15 +2,16 @@ package com.wcw.usercenter.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.wcw.usercenter.common.ErrorCode;
 import com.wcw.usercenter.exception.BusinessException;
 import com.wcw.usercenter.mapper.MessageMapper;
 import com.wcw.usercenter.model.domain.Message;
 import com.wcw.usercenter.model.domain.User;
+import com.wcw.usercenter.model.vo.BlogVO;
 import com.wcw.usercenter.model.vo.MessageVO;
 import com.wcw.usercenter.model.vo.UserVo;
+import com.wcw.usercenter.service.BlogService;
 import com.wcw.usercenter.service.MessageService;
 import com.wcw.usercenter.service.UserService;
 import org.springframework.beans.BeanUtils;
@@ -26,8 +27,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.wcw.usercenter.contant.RedisConstants.MESSAGE_BLOG_NUM_KEY;
-import static com.wcw.usercenter.contant.RedisConstants.MESSAGE_LIKE_NUM_KEY;
+import static com.wcw.usercenter.contant.RedisConstants.*;
 
 
 /**
@@ -41,7 +41,9 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
     @Resource
     @Lazy
     private UserService userService;
-
+    @Resource
+    @Lazy
+    private BlogService blogService;
     @Resource
     private StringRedisTemplate stringRedisTemplate;
 
@@ -118,6 +120,28 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
             return Long.parseLong(blogNum) > 0;
         }
         return false;
+    }
+
+    @Override
+    public List<BlogVO> getUserBlog(Long userId) {
+        String key = BLOG_FEED_KEY + userId;
+        Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet()
+                .reverseRangeByScoreWithScores(key, 0, System.currentTimeMillis(), 0, 10);
+        if (typedTuples == null || typedTuples.size() == 0) {
+            return new ArrayList<>();
+        }
+        ArrayList<BlogVO> blogVOList = new ArrayList<>(typedTuples.size());
+        for (ZSetOperations.TypedTuple<String> tuple : typedTuples) {
+            long blogId = Long.parseLong(Objects.requireNonNull(tuple.getValue()));
+            BlogVO blogVO = blogService.getBlogById(blogId, userId);
+            blogVOList.add(blogVO);
+        }
+        String likeNumKey = MESSAGE_BLOG_NUM_KEY + userId;
+        Boolean hasKey = stringRedisTemplate.hasKey(likeNumKey);
+        if (Boolean.TRUE.equals(hasKey)) {
+            stringRedisTemplate.opsForValue().set(likeNumKey, "0");
+        }
+        return blogVOList;
     }
 }
 

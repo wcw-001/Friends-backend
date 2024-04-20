@@ -56,7 +56,7 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
         }
         List<ChatMessageVO> chatRecords = getCache(CACHE_CHAT_PRIVATE, loginUser.getId() + String.valueOf(toId));
         if (chatRecords != null && chatRecords.size() > 0) {
-           // saveCache(CACHE_CHAT_PRIVATE, loginUser.getId() + String.valueOf(toId), chatRecords);
+            saveCache(CACHE_CHAT_PRIVATE, loginUser.getId() + String.valueOf(toId), chatRecords);
             return chatRecords;
         }
         LambdaQueryWrapper<Chat> chatLambdaQueryWrapper = new LambdaQueryWrapper<>();

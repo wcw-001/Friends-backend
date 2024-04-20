@@ -37,7 +37,7 @@ public interface RedisConstants {
     /**
      * 用户忘记密码键
      */
-    String USER_FORGET_PASSWORD_KEY = "campus:user:forget:";
+    String USER_FORGET_PASSWORD_KEY = "wcw:user:forget:";
     /**
      * 用户忘记密码过期时间
      */
@@ -45,17 +45,17 @@ public interface RedisConstants {
     /**
      * 博客推送键
      */
-    String BLOG_FEED_KEY = "campus:feed:blog:";
+    String BLOG_FEED_KEY = "wcw:feed:blog:";
     /**
      * 新博文消息键
      */
-    String MESSAGE_BLOG_NUM_KEY = "campus:message:blog:num:";
+    String MESSAGE_BLOG_NUM_KEY = "wcw:message:blog:num:";
     /**
      * 新点赞消息键
      */
-    String MESSAGE_LIKE_NUM_KEY = "campus:message:like:num:";
+    String MESSAGE_LIKE_NUM_KEY = "wcw:message:like:num:";
     /**
      * 用户推荐缓存
      */
-    String USER_RECOMMEND_KEY = "campus:recommend:";
+    String USER_RECOMMEND_KEY = "wcw:recommend:";
 }

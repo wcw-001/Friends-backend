@@ -10,11 +10,8 @@ import com.wcw.usercenter.model.request.ChatRequest;
 import com.wcw.usercenter.model.vo.ChatMessageVO;
 import com.wcw.usercenter.service.ChatService;
 import com.wcw.usercenter.service.UserService;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -27,13 +24,11 @@ public class ChatController {
      */
     @Resource
     private ChatService chatService;
-
     /**
      * 用户服务
      */
     @Resource
     private UserService userService;
-
     /**
      * 私聊
      * @param chatRequest
@@ -42,9 +37,6 @@ public class ChatController {
      */
     @PostMapping("/privateChat")
     @ApiOperation(value = "获取私聊")
-    @ApiImplicitParams(
-            {@ApiImplicitParam(name = "chatRequest", value = "聊天请求"),
-                    @ApiImplicitParam(name = "request", value = "request请求")})
     public BaseResponse<List<ChatMessageVO>> getPrivateChat(@RequestBody ChatRequest chatRequest, HttpServletRequest request) {
         if (chatRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -65,9 +57,6 @@ public class ChatController {
      */
     @PostMapping("/teamChat")
     @ApiOperation(value = "获取队伍聊天")
-    @ApiImplicitParams(
-            {@ApiImplicitParam(name = "chatRequest", value = "聊天请求"),
-                    @ApiImplicitParam(name = "request", value = "request请求")})
     public BaseResponse<List<ChatMessageVO>> getTeamChat(@RequestBody ChatRequest chatRequest, HttpServletRequest request) {
         if (chatRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求有误");
@@ -88,11 +77,9 @@ public class ChatController {
      */
     @GetMapping("/hallChat")
     @ApiOperation(value = "获取大厅聊天")
-    @ApiImplicitParams(
-            {@ApiImplicitParam(name = "request", value = "request请求")})
     public BaseResponse<List<ChatMessageVO>> getHallChat(HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
-        if (loginUser==null){
+        if (loginUser == null){
             throw new BusinessException(ErrorCode.NOT_LOGIN);
         }
         List<ChatMessageVO> hallChat = chatService.getHallChat(ChatConstant.HALL_CHAT, loginUser);

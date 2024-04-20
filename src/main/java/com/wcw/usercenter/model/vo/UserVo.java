@@ -2,6 +2,7 @@ package com.wcw.usercenter.model.vo;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -86,5 +87,10 @@ public class UserVo implements Serializable {
      * 标签列表json
      */
     private String tags;
+    /**
+     * 是否关注
+     */
+    @ApiModelProperty(value = "是否关注")
+    private Boolean isFollow;
 
 }

@@ -93,10 +93,14 @@ public class User implements Serializable {
      */
     private String userCode;
 
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
     /**
      * 标签列表json
      */
     private String tags;
+    /**
+     * 好友列表id
+     */
+    private String friendIds;
+    @TableField(exist = false)
+    private static final long serialVersionUID = 1L;
 }

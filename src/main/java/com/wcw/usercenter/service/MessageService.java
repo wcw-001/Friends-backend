@@ -2,6 +2,7 @@ package com.wcw.usercenter.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.wcw.usercenter.model.domain.Message;
+import com.wcw.usercenter.model.vo.BlogVO;
 import com.wcw.usercenter.model.vo.MessageVO;
 
 import java.util.List;
@@ -21,4 +22,6 @@ public interface MessageService extends IService<Message> {
 
 
     Boolean hasNewMessage(Long userId);
+
+    List<BlogVO> getUserBlog(Long id);
 }

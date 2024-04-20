@@ -43,37 +43,37 @@ import static com.wcw.usercenter.contant.UserConstant.USER_LOGIN_STATE;
 @ServerEndpoint(value = "/websocket/{userId}/{teamId}", configurator = HttpSessionConfig.class)
 public class WebSocket {
     /**
-     * 保存队伍的连接信息
+     * 存储各个队伍的连接信息，使用队伍ID作为键，ConcurrentHashMap作为值，以支持线程安全的读写操作。
      */
     private static final Map<String, ConcurrentHashMap<String, WebSocket>> ROOMS = new HashMap<>();
     /**
-     * 线程安全的无序的集合
+     * 存储所有会话的线程安全集合，用于广播消息。
      */
     private static final CopyOnWriteArraySet<Session> SESSIONS = new CopyOnWriteArraySet<>();
     /**
-     * 会话池
+     * 会话池，用于存储和管理用户会话。
      */
     private static final Map<String, Session> SESSION_POOL = new HashMap<>(0);
     /**
-     * 用户服务
+     * 用户服务，用于用户相关操作。
      */
     private static UserService userService;
     /**
-     * 聊天服务
+     * 聊天服务，用于处理聊天相关操作。
      */
     private static ChatService chatService;
     /**
-     * 团队服务
+     * 团队服务，用于处理团队相关操作。
      */
     private static TeamService teamService;
 
     /**
-     * 房间在线人数
+     * 在线人数计数器。
      */
     private static int onlineCount = 0;
 
     /**
-     * 当前信息
+     * 当前会话。
      */
     private Session session;
 
@@ -106,9 +106,9 @@ public class WebSocket {
     }
 
     /**
-     * 集热地图服务
+     * 设置用户服务。
      *
-     * @param userService 用户服务
+     * @param userService 用户服务实例。
      */
     @Resource
     public void setHeatMapService(UserService userService) {
@@ -116,9 +116,9 @@ public class WebSocket {
     }
 
     /**
-     * 集热地图服务
+     * 设置聊天服务。
      *
-     * @param chatService 聊天服务
+     * @param chatService 聊天服务实例。
      */
     @Resource
     public void setHeatMapService(ChatService chatService) {
@@ -126,9 +126,9 @@ public class WebSocket {
     }
 
     /**
-     * 集热地图服务
+     * 设置团队服务。
      *
-     * @param teamService 团队服务
+     * @param teamService 团队服务实例。
      */
     @Resource
     public void setHeatMapService(TeamService teamService) {
@@ -137,10 +137,10 @@ public class WebSocket {
 
 
     /**
-     * 队伍内群发消息
+     * 向指定队伍内所有成员广播消息。
      *
-     * @param teamId 团队id
-     * @param msg    消息
+     * @param teamId 队伍ID。
+     * @param msg    消息内容。
      */
     public static void broadcast(String teamId, String msg) {
         ConcurrentHashMap<String, WebSocket> map = ROOMS.get(teamId);
@@ -156,22 +156,23 @@ public class WebSocket {
     }
 
     /**
-     * 发送消息
+     * 发送消息到客户端。
      *
-     * @param message 消息
-     * @throws IOException ioexception
+     * @param message 消息内容。
+     * @throws IOException 通信异常。
      */
     public void sendMessage(String message) throws IOException {
         this.session.getBasicRemote().sendText(message);
     }
 
     /**
-     * 开放
+     * 用户连接打开时的处理逻辑。
      *
-     * @param session 会话
-     * @param userId  用户id
-     * @param teamId  团队id
-     * @param config  配置
+     * @param session  WebSocket会话。
+     * @param userId   用户ID。
+     * @param teamId   队伍ID。
+     * @param config   终端配置。
+     * @throws IOException 通信异常。
      */
     @OnOpen
     public void onOpen(Session session, @PathParam(value = "userId") String userId, @PathParam(value = "teamId") String teamId, EndpointConfig config) {
@@ -186,6 +187,7 @@ public class WebSocket {
                 this.session = session;
                 this.httpSession = httpSession;
             }
+
             if (!"NaN".equals(teamId)) {
                 if (!ROOMS.containsKey(teamId)) {
                     ConcurrentHashMap<String, WebSocket> room = new ConcurrentHashMap<>(0);
@@ -242,9 +244,10 @@ public class WebSocket {
     }
 
     /**
-     * 客户端接收服务端数据时触发
-     * @param message
-     * @param userId
+     * 收到客户端消息时的处理逻辑。
+     *
+     * @param message 消息内容。
+     * @param userId  用户ID。
      */
     @OnMessage
     public void onMessage(String message, @PathParam("userId") String userId) {
@@ -442,18 +445,20 @@ public class WebSocket {
     }
 
     /**
-     * 给所有用户
+     * 发送当前所有用户的信息给新加入的用户
      */
     public void sendAllUsers() {
         HashMap<String, List<WebSocketVO>> stringListHashMap = new HashMap<>(0);
         List<WebSocketVO> WebSocketVOs = new ArrayList<>();
         stringListHashMap.put("users", WebSocketVOs);
+        // 遍历在线用户池，获取每个用户的信息，并将其转换为WebSocketVO对象添加到列表中
         for (Serializable key : SESSION_POOL.keySet()) {
-            User user = userService.getById(key);
+            User user = userService.getById(key); // 根据key（用户ID）获取用户信息
             WebSocketVO WebSocketVO = new WebSocketVO();
-            BeanUtils.copyProperties(user, WebSocketVO);
+            BeanUtils.copyProperties(user, WebSocketVO);// 将用户信息拷贝到WebSocketVO对象
             WebSocketVOs.add(WebSocketVO);
         }
+        // 发送包含所有用户信息的JSON字符串给所有客户端
         sendAllMessage(JSONUtil.toJsonStr(stringListHashMap));
     }
 }

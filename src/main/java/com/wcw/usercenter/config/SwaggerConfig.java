@@ -3,6 +3,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
@@ -18,10 +19,10 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebMvc;
  * 自定义Swagger接口文档的配置
  */
 @EnableSwagger2WebMvc
-//@ComponentScan(basePackages = {"com.wcw.usercenter"})
+@ComponentScan(basePackages = {"com.wcw.usercenter"})
 @Configuration
 @Profile("dev")
-public class SwaggerConfig {//extends WebMvcConfigurationSupport{
+public class SwaggerConfig extends WebMvcConfigurationSupport{
     @Bean(value = "defaultApi2")
     public Docket defaultApi2() {
         return new Docket(DocumentationType.SWAGGER_2)
@@ -44,5 +45,14 @@ public class SwaggerConfig {//extends WebMvcConfigurationSupport{
                 .contact(new Contact("wcw", "https://user.wcw231407.cn", "2314075528@qq.com"))//作者信息
                 .version("6.6.6")//版本号
                 .build();
+    }
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/**").addResourceLocations(
+                "classpath:/static/");
+        registry.addResourceHandler("doc.html").addResourceLocations(
+                "classpath:/META-INF/resources/");
+        registry.addResourceHandler("/webjars/**").addResourceLocations(
+                "classpath:/META-INF/resources/webjars/");
     }
 }

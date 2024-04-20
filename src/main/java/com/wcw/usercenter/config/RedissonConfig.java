@@ -1,7 +1,6 @@
 package com.wcw.usercenter.config;
 
 import lombok.Data;
-import net.bytebuddy.build.ToStringPlugin;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;

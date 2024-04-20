@@ -23,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.BeanUtils;
-import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -124,7 +123,7 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
     }
 
     @Override
-    public Page<TeamUserVo> listTeams(TeamQuery teamQuery,boolean isAdmin,User loginUser) {
+    public Page<TeamUserVo> listTeams(TeamQuery teamQuery, boolean isAdmin, User loginUser) {
         QueryWrapper<Team> queryWrapper = new QueryWrapper<>();
         //组合查询条件
         if(teamQuery != null){

@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.wcw.usercenter.contant.RedisConstants.USER_FORGET_PASSWORD_KEY;
+import static com.wcw.usercenter.contant.RedisConstants.USER_RECOMMEND_KEY;
 import static com.wcw.usercenter.contant.UserConstant.ADMIN_RILE;
 import static com.wcw.usercenter.contant.UserConstant.USER_LOGIN_STATE;
 
@@ -154,6 +155,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return safetyUser;
     }
 
+    /**
+     * 更新用户密码
+     * @param updatePasswordRequest
+     * @param request
+     * @return
+     */
     @Override
     public boolean updateUserPassword(UserUpdatePasswordRequest updatePasswordRequest, HttpServletRequest request) {
         if (updatePasswordRequest == null) {
@@ -212,6 +219,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             safetyUser.setCreateTime(originUser.getCreateTime());
             safetyUser.setUserRole(originUser.getUserRole());
             safetyUser.setTags(originUser.getTags());
+            safetyUser.setFriendIds(originUser.getFriendIds());
             return safetyUser;
         }
 

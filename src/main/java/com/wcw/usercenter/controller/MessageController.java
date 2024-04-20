@@ -6,6 +6,7 @@ import com.wcw.usercenter.common.ResultUtils;
 import com.wcw.usercenter.contant.RedisConstants;
 import com.wcw.usercenter.exception.BusinessException;
 import com.wcw.usercenter.model.domain.User;
+import com.wcw.usercenter.model.vo.BlogVO;
 import com.wcw.usercenter.model.vo.MessageVO;
 import com.wcw.usercenter.service.MessageService;
 import com.wcw.usercenter.service.UserService;
@@ -32,7 +33,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/message")
 @Api(tags = "消息管理模块")
-@CrossOrigin(originPatterns = {"http://localhost:5173", "http://pt.kongwcw.top"}, allowCredentials = "true")
 public class MessageController {
 
     /**
@@ -57,10 +57,8 @@ public class MessageController {
      * @param request 请求
      * @return {@link BaseResponse}<{@link Boolean}>
      */
-    @GetMapping
+    @GetMapping()
     @ApiOperation(value = "用户是否有新消息")
-    @ApiImplicitParams(
-            {@ApiImplicitParam(name = "request", value = "request请求")})
     public BaseResponse<Boolean> userHasNewMessage(HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
@@ -131,12 +129,9 @@ public class MessageController {
      * 获取用户博客消息数量
      *
      * @param request 请求
-     * @return {@link BaseResponse}<{@link String}>
      */
     @GetMapping("/blog/num")
     @ApiOperation(value = "获取用户博客消息数量")
-    @ApiImplicitParams(
-            {@ApiImplicitParam(name = "request", value = "request请求")})
     public BaseResponse<String> getUserBlogMessageNum(HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
@@ -150,6 +145,24 @@ public class MessageController {
         } else {
             return ResultUtils.success("0");
         }
+    }
+    /**
+     * 获取用户博客消息
+     *
+     * @param request 请求
+     * @return {@link BaseResponse}<{@link List}<{@link BlogVO}>>
+     */
+    @GetMapping("/blog")
+    @ApiOperation(value = "获取用户博客消息")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<List<BlogVO>> getUserBlogMessage(HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        List<BlogVO> blogVOList = messageService.getUserBlog(loginUser.getId());
+        return ResultUtils.success(blogVOList);
     }
 
 }

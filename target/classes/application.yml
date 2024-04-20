@@ -55,5 +55,11 @@ oss:
     access-key-id: RfAPWyXFwNHF6Z8OBQipIg_1iNIp-KJj5A-Fe5eL
     access-key-secret: -OUMlQVUczKKAVBVp9Q5xBUIasMw1hBRdXqCFJ9B
     bucket-name: fancydog
-
+chatgpt:
+  token: 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
+  timeout: 1000
+  username:
+  password:
+  ip: 127.0.0.1
+  port: 7890
 
