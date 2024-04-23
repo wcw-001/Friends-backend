@@ -110,7 +110,7 @@ public class BlogController {
     }
 
     /**
-     * 像博客
+     * 点赞博客
      *
      * @param id      id
      * @param request 请求

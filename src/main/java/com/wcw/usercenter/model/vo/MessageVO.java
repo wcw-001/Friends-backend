@@ -25,6 +25,10 @@ public class MessageVO extends Message {
      */
     @ApiModelProperty(value = "发送用户id")
     private UserVo fromUser;
-
+    /**
+     * 博客
+     */
+    @ApiModelProperty(value = "博客")
+    private BlogVO blog;
 
 }

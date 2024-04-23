@@ -8,6 +8,7 @@ import com.wcw.usercenter.exception.BusinessException;
 import com.wcw.usercenter.mapper.MessageMapper;
 import com.wcw.usercenter.model.domain.Message;
 import com.wcw.usercenter.model.domain.User;
+import com.wcw.usercenter.model.enums.MessageTypeEnum;
 import com.wcw.usercenter.model.vo.BlogVO;
 import com.wcw.usercenter.model.vo.MessageVO;
 import com.wcw.usercenter.model.vo.UserVo;
@@ -96,6 +97,10 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
             UserVo userVO = new UserVo();
             BeanUtils.copyProperties(user, userVO);
             messageVO.setFromUser(userVO);
+            if (item.getType() == MessageTypeEnum.BLOG_LIKE.getValue()) {
+                BlogVO blogVO = blogService.getBlogById(Long.parseLong(item.getData()), userId);
+                messageVO.setBlog(blogVO);
+            }
             return messageVO;
         }).collect(Collectors.toList());
     }

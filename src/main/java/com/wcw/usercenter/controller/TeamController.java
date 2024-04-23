@@ -6,6 +6,7 @@ import com.wcw.usercenter.common.DeleteRequest;
 import com.wcw.usercenter.common.ErrorCode;
 import com.wcw.usercenter.common.ResultUtils;
 import com.wcw.usercenter.exception.BusinessException;
+import com.wcw.usercenter.manager.RedisLimiterManager;
 import com.wcw.usercenter.model.domain.Team;
 import com.wcw.usercenter.model.domain.User;
 import com.wcw.usercenter.model.domain.UserTeam;
@@ -36,6 +37,8 @@ public class TeamController {
     private TeamService teamService;
     @Resource
     private UserTeamService userTeamService;
+    @Resource
+    private RedisLimiterManager redisLimiterManager;
 
     @PostMapping("/add")
     public BaseResponse<Long> addTeam(@RequestBody TeamAddRequest teamAddRequest,HttpServletRequest request){
@@ -43,6 +46,11 @@ public class TeamController {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         User loginUser = userService.getLoginUser(request);
+        if(loginUser == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        // 限流
+        boolean doRateLimit = redisLimiterManager.doRateLimit(loginUser.getId().toString());
         Team team = new Team();
         BeanUtils.copyProperties(teamAddRequest,team);
         long teamId = teamService.addTeam(team,loginUser);
@@ -88,10 +96,6 @@ public class TeamController {
         return ResultUtils.success(finalTeamList);
     }
 
-
-
-
-    // todo 查询分页
     @GetMapping("/list/page")
     public BaseResponse<Page<Team>> listTeamsByPage(TeamQuery teamQuery){
         if(teamQuery == null){

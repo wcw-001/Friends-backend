@@ -296,8 +296,6 @@ public class TeamServiceImpl extends ServiceImpl<TeamMapper, Team>
         }
 
     }
-
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean quitTeam(TeamQuitRequest teamQuitRequest, User loginUser) {
