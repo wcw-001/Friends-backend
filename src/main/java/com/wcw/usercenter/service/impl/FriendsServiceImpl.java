@@ -4,6 +4,7 @@ import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.google.gson.Gson;
 import com.wcw.usercenter.common.ErrorCode;
@@ -157,6 +158,7 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
      * @return
      */
     @Override
+    @Transactional
     public List<FriendRecordsVO> obtainFriendApplicationRecords(User loginUser) {
         // 查询出当前用户接收所有申请、同意记录
         LambdaQueryWrapper<Friends> friendsLambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -168,6 +170,10 @@ public class FriendsServiceImpl extends ServiceImpl<FriendsMapper, Friends>
             BeanUtils.copyProperties(friend, friendRecordsVO);
             User user = userService.getById(friend.getFromId());
             friendRecordsVO.setApplyUser(userService.getSafetyUser(user));
+            if(friend.getIsRead() == NOT_READ){
+                friend.setIsRead(READ);
+            }
+            this.updateById(friend);
             return friendRecordsVO;
         }).collect(Collectors.toList());
     }

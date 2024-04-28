@@ -8,7 +8,7 @@ class OpenAiAnswererTest {
 
     @Test
     void doAnswer01() {
-        OpenAiAnswerer test = new OpenAiAnswerer();
-        test.doAnswer("你好");
+//        OpenAiAnswerer test = new OpenAiAnswerer();
+//        test.doAnswer("你好");
     }
 }

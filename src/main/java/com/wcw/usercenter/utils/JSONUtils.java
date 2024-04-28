@@ -1,5 +1,7 @@
 package com.wcw.usercenter.utils;
 
+//http://yunfriend.wcw231407.cn/user/login?redirect=http://yunfriend.wcw231407.cn/teampackage com.wcw.usercenter.utils;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -10,7 +12,7 @@ import java.util.Set;
 /**
  * @Author: wcw
  * @Date: 2023年03月21日 08:02
- * @Version: 1.0
+ * @Version: 1.0http://yunfriend.wcw231407.cn/user/login?redirect=http://yunfriend.wcw231407.cn/team
  * @Description: 字符串工具类
  */
 public class JSONUtils {

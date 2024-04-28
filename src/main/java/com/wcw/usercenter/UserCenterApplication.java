@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 
 @SpringBootApplication
 //@MapperScan("com.wcw.usercenter")
-//@CrossOrigin(origins = "http://localhost:5173")
+//@CrossOrigin
 @EnableScheduling
 public class UserCenterApplication {
 

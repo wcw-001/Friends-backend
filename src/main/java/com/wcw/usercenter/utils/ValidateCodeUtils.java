@@ -7,7 +7,7 @@ import java.util.Random;
  * 验证码生成工具
  *
  * @author wcw
- * @date 2023/06/22
+ * @date 2024/01/22
  */
 public class ValidateCodeUtils {
     /**
