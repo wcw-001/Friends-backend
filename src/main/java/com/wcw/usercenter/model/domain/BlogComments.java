@@ -14,11 +14,10 @@ import java.util.Date;
 /**
  * 博客评论
  *
- * @author Shier
+ * @author wcw
  * @TableName blog_comments
- * @date 2023/07/28
  */
-@TableName(value ="blog_comments")
+@TableName(value ="tb_blog_comments")
 @Data
 @ApiModel(value = "博文评论")
 public class BlogComments implements Serializable {
@@ -63,7 +62,7 @@ public class BlogComments implements Serializable {
      * 点赞数
      */
     @ApiModelProperty(value = "id")
-    private Integer likedNum;
+    private Integer liked;
 
     /**
      * 状态，0：正常，1：被举报，2：禁止查看
@@ -85,4 +84,5 @@ public class BlogComments implements Serializable {
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
+
 }
