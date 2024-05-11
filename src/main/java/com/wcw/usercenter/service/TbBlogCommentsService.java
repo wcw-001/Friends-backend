@@ -35,4 +35,6 @@ public interface TbBlogCommentsService extends IService<BlogComments> {
      * @param isAdmin
      */
     void deleteComment(Long id, Long userId, boolean isAdmin);
+
+    List<BlogCommentsVO> listMyComments(long userId,long blogId);
 }

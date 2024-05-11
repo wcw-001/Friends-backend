@@ -128,6 +128,23 @@ public class CommentController {
         commentService.deleteComment(id, loginUser.getId(), isAdmin);
         return ResultUtils.success("ok");
     }
+    /**
+     * 获取评论列表
+     * @param request     请求
+     */
+    @GetMapping("/list/my")
+    @ApiOperation(value = "获取评论")
+    public BaseResponse<List<BlogCommentsVO>> listMyBlogPage(long blogId, HttpServletRequest request) {
+        User loginUser = userService.getLoginUser(request);
+        if (loginUser == null){
+            throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+        if( blogId <= 0 ){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        List<BlogCommentsVO> commentsList = commentService.listMyComments(loginUser.getId(),blogId);
+        return ResultUtils.success(commentsList);
+    }
 
 
 

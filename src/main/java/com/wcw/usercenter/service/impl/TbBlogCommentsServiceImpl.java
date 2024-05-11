@@ -138,4 +138,30 @@ public class TbBlogCommentsServiceImpl extends ServiceImpl<TbBlogCommentsMapper,
         blog.setCommentsNum(blog.getCommentsNum() - 1);
         blogService.updateById(blog);
     }
+
+    @Override
+    public List<BlogCommentsVO> listMyComments(long userId,long blogId) {
+        //查出博客的所有评论
+        QueryWrapper<BlogComments> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("blog_id", blogId);
+        List<BlogComments> blogComments = this.list(queryWrapper);
+        if (blogComments == null && blogComments.size() == 0) {
+            return Collections.emptyList();
+        }
+        List<BlogCommentsVO> result = blogComments.stream().map(blogComment -> {
+            BlogCommentsVO blogCommentsVO = new BlogCommentsVO();
+            BeanUtils.copyProperties(blogComment, blogCommentsVO);
+            //Long commentUserId = blogComment.getUserId();
+            User user = userService.getById(userId);
+            UserVo userVo = new UserVo();
+            BeanUtils.copyProperties(user, userVo);
+            blogCommentsVO.setCommentUser(userVo);
+            QueryWrapper<CommentLike> queryWrapper1 = new QueryWrapper<>();
+            queryWrapper1.eq("user_id", userId).eq("comment_id", blogComment.getId());
+            long count = commentLikeService.count(queryWrapper1);
+            blogCommentsVO.setIsLiked(count > 0);
+            return blogCommentsVO;
+        }).collect(Collectors.toList());
+        return result;
+    }
 }
