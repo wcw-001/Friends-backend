@@ -69,20 +69,20 @@ public class CommentController {
      * @return {@link BaseResponse}<{@link String}>
      */
     @PostMapping("/add")
-    public BaseResponse<String> addBlog(CommentAddRequest commentAddRequest, HttpServletRequest request) {
+    public BaseResponse<String> addBlog(@RequestBody CommentAddRequest commentAddRequest, HttpServletRequest request) {
         User loginUser = userService.getLoginUser(request);
         if (loginUser == null) {
             throw new BusinessException(ErrorCode.NOT_LOGIN);
+        }
+
+        if (commentAddRequest.getBlogId() == null || StringUtils.isBlank(commentAddRequest.getContent())) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
         // 限流
         boolean doRateLimit = redisLimiterManager.doRateLimit(loginUser.getId().toString());
         if (!doRateLimit) {
             throw new BusinessException(ErrorCode.TOO_MANY_REQUEST);
         }
-        if (commentAddRequest.getBlogId() == null || StringUtils.isBlank(commentAddRequest.getContent())) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
-
         commentService.addBlog(commentAddRequest, loginUser);
 //        bloomFilter.add(BLOG_BLOOM_PREFIX + blogId);
         return ResultUtils.success("添加成功");
@@ -129,7 +129,7 @@ public class CommentController {
         return ResultUtils.success("ok");
     }
     /**
-     * 获取评论列表
+     * 获取我的评论列表
      * @param request     请求
      */
     @GetMapping("/list/my")
@@ -145,7 +145,5 @@ public class CommentController {
         List<BlogCommentsVO> commentsList = commentService.listMyComments(loginUser.getId(),blogId);
         return ResultUtils.success(commentsList);
     }
-
-
 
 }

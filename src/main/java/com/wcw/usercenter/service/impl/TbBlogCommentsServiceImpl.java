@@ -63,7 +63,7 @@ public class TbBlogCommentsServiceImpl extends ServiceImpl<TbBlogCommentsMapper,
     public List<BlogCommentsVO> listComments(long blogId) {
         //查出博客的所有评论
         QueryWrapper<BlogComments> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("blog_id", blogId);
+        queryWrapper.eq("blogId", blogId);
         List<BlogComments> blogComments = this.list(queryWrapper);
         if (blogComments == null && blogComments.size() == 0) {
             return Collections.emptyList();
@@ -77,7 +77,7 @@ public class TbBlogCommentsServiceImpl extends ServiceImpl<TbBlogCommentsMapper,
             BeanUtils.copyProperties(user, userVo);
             blogCommentsVO.setCommentUser(userVo);
             QueryWrapper<CommentLike> queryWrapper1 = new QueryWrapper<>();
-            queryWrapper1.eq("user_id", userId).eq("comment_id", blogComment.getId());
+            queryWrapper1.eq("userId", userId).eq("commentId", blogComment.getId());
             long count = commentLikeService.count(queryWrapper1);
             blogCommentsVO.setIsLiked(count > 0);
             return blogCommentsVO;
@@ -99,7 +99,7 @@ public class TbBlogCommentsServiceImpl extends ServiceImpl<TbBlogCommentsMapper,
             commentLikeService.save(commentLike);
             BlogComments blogComments = this.getById(commentId);
             this.update().eq("id", commentId)
-                    .set("liked_num", blogComments.getLiked() + 1)
+                    .set("likedNum", blogComments.getLiked() + 1)
                     .update();
             String likeNumKey = MESSAGE_LIKE_NUM_KEY + blogComments.getUserId();
             Boolean hasKey = stringRedisTemplate.hasKey(likeNumKey);
@@ -118,7 +118,7 @@ public class TbBlogCommentsServiceImpl extends ServiceImpl<TbBlogCommentsMapper,
             commentLikeService.remove(commentLikeLambdaQueryWrapper);
             BlogComments blogComments = this.getById(commentId);
             this.update().eq("id", commentId)
-                    .set("liked_num", blogComments.getLiked() - 1)
+                    .set("likedNum", blogComments.getLiked() - 1)
                     .update();
         }
     }
@@ -143,7 +143,7 @@ public class TbBlogCommentsServiceImpl extends ServiceImpl<TbBlogCommentsMapper,
     public List<BlogCommentsVO> listMyComments(long userId,long blogId) {
         //查出博客的所有评论
         QueryWrapper<BlogComments> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("blog_id", blogId);
+        queryWrapper.eq("blogId", blogId);
         List<BlogComments> blogComments = this.list(queryWrapper);
         if (blogComments == null && blogComments.size() == 0) {
             return Collections.emptyList();
@@ -157,7 +157,7 @@ public class TbBlogCommentsServiceImpl extends ServiceImpl<TbBlogCommentsMapper,
             BeanUtils.copyProperties(user, userVo);
             blogCommentsVO.setCommentUser(userVo);
             QueryWrapper<CommentLike> queryWrapper1 = new QueryWrapper<>();
-            queryWrapper1.eq("user_id", userId).eq("comment_id", blogComment.getId());
+            queryWrapper1.eq("userId", userId).eq("commentId", blogComment.getId());
             long count = commentLikeService.count(queryWrapper1);
             blogCommentsVO.setIsLiked(count > 0);
             return blogCommentsVO;

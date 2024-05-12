@@ -6,15 +6,15 @@
 
     <resultMap id="BaseResultMap" type="com.wcw.usercenter.model.domain.CommentLike">
             <id property="id" column="id" jdbcType="BIGINT"/>
-            <result property="commentId" column="comment_id" jdbcType="BIGINT"/>
-            <result property="userId" column="user_id" jdbcType="BIGINT"/>
-            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
-            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
-            <result property="isDelete" column="is_delete" jdbcType="TINYINT"/>
+            <result property="commentId" column="commentId" jdbcType="BIGINT"/>
+            <result property="userId" column="userId" jdbcType="BIGINT"/>
+            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,comment_id,user_id,
-        create_time,update_time,is_delete
+        id,commentId,userId,
+        createTime,updateTime,isDelete
     </sql>
 </mapper>
