@@ -74,21 +74,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         String validPattern = "[`~!@#$%^&*()+=|{}':;',\\\\[\\\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
         Matcher matcher = Pattern.compile(validPattern).matcher(userAccount);
         if (matcher.find()) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号不能包含特殊字符");
         }
         //账号不能重复
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userAccount", userAccount);
         long count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"账号重复");
         }
         //编号不能重复
         queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("phone", phone);
         count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"手机号重复");
         }
         //加密
         String encryptPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
@@ -99,9 +99,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         user.setPhone(phone);
         boolean saveResult = this.save(user);
         if (!saveResult) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"插入数据失败");
         }
-
         return user.getId();
     }
 
@@ -202,9 +201,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
      */
     @Override
         public User getSafetyUser(User originUser){
-            if(originUser ==null){
-                throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户未登录");
-            }
+//            if(originUser ==null){
+//                throw new BusinessException(ErrorCode.PARAMS_ERROR,"用户未登录");
+//            }
             User safetyUser = new User();
             safetyUser.setId(originUser.getId());
             safetyUser.setUsername(originUser.getUsername());

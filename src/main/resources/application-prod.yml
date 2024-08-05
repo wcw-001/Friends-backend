@@ -1,14 +1,14 @@
 spring:
-  application: name:user-center
+  application: name:fancy_friend
   #DataSource Config
   datasource:
     driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://43.143.137.139:3306/wcw001
+    url: jdbc:mysql://112.124.30.198:3306/wcw001
     username: wcw001
     password: wcw231407
   redis:
     port: 6379
-    host: 43.143.137.139
+    host: 112.124.30.198
     password: 123456
     database: 0
   #session的配置
@@ -22,9 +22,9 @@ server:
     context-path: /api
     session:
       cookie:
-        domain: wcw231407.cn
-        secure: true
-        same-site: none
+        domain: 112.124.30.198
+        secure: false
+        same-site: lax
 
 
 

@@ -153,10 +153,10 @@ CREATE TABLE `tb_blog_comments`
 CREATE TABLE `comment_like`
 (
     `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键',
-    `user_id` bigint(20) UNSIGNED NOT NULL COMMENT '用户id',
-    `comment_id` bigint(20) UNSIGNED NOT NULL COMMENT '评论id',
-    `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `userId` bigint(20) UNSIGNED NOT NULL COMMENT '用户id',
+    `commentId` bigint(20) UNSIGNED NOT NULL COMMENT '评论id',
+    `createTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updateTime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB
 

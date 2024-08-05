@@ -39,8 +39,8 @@ public class SwaggerConfig extends WebMvcConfigurationSupport{
      */
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("Fancydog用户中心")//标题
-                .description("Fancydog用户中心接口文档")//描述
+                .title("相友聚")//标题
+                .description("相友聚接口文档")//描述
                 .termsOfServiceUrl("https://user.wcw231407.cn")//（不可见）条款地址，公司内部使用的话不需要配
                 .contact(new Contact("wcw", "https://user.wcw231407.cn", "2314075528@qq.com"))//作者信息
                 .version("6.6.6")//版本号

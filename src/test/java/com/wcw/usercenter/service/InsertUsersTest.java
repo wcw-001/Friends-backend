@@ -94,4 +94,5 @@ public class InsertUsersTest {
         System.out.println(stopWatch.getTotalTimeMillis());
     }
 
+
 }
