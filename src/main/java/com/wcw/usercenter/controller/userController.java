@@ -12,9 +12,11 @@ import com.wcw.usercenter.contant.RedisConstants;
 import com.wcw.usercenter.contant.UserConstant;
 import com.wcw.usercenter.exception.BusinessException;
 import com.wcw.usercenter.exception.ThrowUtils;
+import com.wcw.usercenter.model.domain.Follow;
 import com.wcw.usercenter.model.domain.User;
 import com.wcw.usercenter.model.request.*;
 import com.wcw.usercenter.model.vo.UserVo;
+import com.wcw.usercenter.service.FollowService;
 import com.wcw.usercenter.service.UserService;
 import com.wcw.usercenter.utils.ValidateCodeUtils;
 import io.swagger.annotations.ApiImplicitParam;
@@ -30,7 +32,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -46,6 +50,8 @@ public class userController {
     private UserService userService;
     @Resource
     private RedisTemplate<String,Object> redisTemplate;
+    @Resource
+    private FollowService followService;
     /**
      * 用户注册
      *
@@ -405,6 +411,36 @@ public class userController {
         }
         userService.updateTags(tags, loginUser.getId());
         return ResultUtils.success("ok");
+    }
+    /**
+     * 根据id获取关注用户
+     *
+     * @param id      id
+     * @param request 请求
+     * @return {@link BaseResponse}<{@link UserVo>
+     */
+    @GetMapping("/follow/{id}")
+    @ApiOperation(value = "根据id获取用户")
+    @ApiImplicitParams(
+            {@ApiImplicitParam(name = "id", value = "用户id"),
+                    @ApiImplicitParam(name = "request", value = "request请求")})
+    public BaseResponse<UserVo> getFollowUserById(@PathVariable Long id, HttpServletRequest request) {
+//        boolean contains = bloomFilter.contains(USER_BLOOM_PREFIX + id);
+//        if (!contains) {
+//            return ResultUtils.success(null);
+//        }
+        User loginUser = userService.getLoginUser(request);
+        UserVo userVo = userService.getUserById(id, loginUser.getId());
+        LambdaQueryWrapper<Follow> followLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        followLambdaQueryWrapper.eq(Follow::getFollowUserId, id);
+        followLambdaQueryWrapper.eq( Follow::getUserId, loginUser.getId());
+        List<Follow> list = followService.list(followLambdaQueryWrapper);
+        if (list == null || list.size() == 0) {
+            userVo.setIsFollow(false);
+        }else {
+            userVo.setIsFollow(true);
+        }
+        return ResultUtils.success(userVo);
     }
 
 }

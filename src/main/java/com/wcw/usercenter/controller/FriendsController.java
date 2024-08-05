@@ -37,7 +37,7 @@ public class FriendsController {
      * @return
      */
     @PostMapping("/add")
-    public BaseResponse<Integer> addFriendsRecords(AddFriendRequest addFriendRequest, HttpServletRequest request){
+    public BaseResponse<Integer> addFriendsRecords(@RequestBody AddFriendRequest addFriendRequest, HttpServletRequest request){
         if(addFriendRequest == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求有误");
         }
